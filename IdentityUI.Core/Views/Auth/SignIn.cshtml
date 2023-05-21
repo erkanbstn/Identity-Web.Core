@@ -1,0 +1,23 @@
+﻿@model SignUpViewModel
+@{
+    ViewData["Title"] = "SignIn";
+}
+<h1>Identity Core Login</h1>
+<br />
+<hr />
+<form method="post">
+    <div class="mb-3">
+        <label for="exampleInputEmail1" class="form-label">Kullanıcı Adı</label>
+        <input type="text" class="form-control" asp-for="UserName" id="exampleInputEmail1" aria-describedby="emailHelp">
+    </div>
+    <div class="mb-3">
+        <label for="exampleInputEmail1" class="form-label">Email Adresi</label>
+        <input type="email" class="form-control" asp-for="Email" id="exampleInputEmail1" aria-describedby="emailHelp">
+        <div id="emailHelp" class="form-text">Emailinizi Kimseyle Paylaşmayacağız.</div>
+    </div>
+    <div class="mb-3">
+        <label for="exampleInputPassword1" class="form-label">Parola</label>
+        <input type="password" class="form-control" asp-for="Password" id="exampleInputPassword1">
+    </div>
+    <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+</form>
