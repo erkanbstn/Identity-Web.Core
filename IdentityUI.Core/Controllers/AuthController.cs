@@ -8,10 +8,12 @@ namespace IdentityUI.Core.Controllers
     public class AuthController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public AuthController(UserManager<AppUser> userManager)
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult SignIn()
@@ -30,6 +32,10 @@ namespace IdentityUI.Core.Controllers
         [HttpPost]
         public async Task<IActionResult> SignUp(SignUpViewModel signUpViewModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
             var result = await _userManager.CreateAsync(new() { UserName = signUpViewModel.UserName, PhoneNumber = signUpViewModel.Phone, Email = signUpViewModel.Email }, signUpViewModel.PasswordConfirm);
             if (result.Succeeded)
             {
@@ -44,7 +50,8 @@ namespace IdentityUI.Core.Controllers
         }
         public async Task<IActionResult> SignOut()
         {
-            return View();
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("SignIn");
         }
 
     }

@@ -1,0 +1,30 @@
+﻿@model List<UserViewModel>
+@{
+    ViewData["Title"] = "UserList";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+
+<h1>Identity Core Users</h1>
+<br />
+<table class="table table-hover">
+    <tr>
+        <th>#</th>
+        <th>Kullanıcı Adı</th>
+        <th>Email</th>
+        <th colspan="2">Aksiyon</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Id</td>
+            <td>@item.Name</td>
+            <td>@item.Email</td>
+            <td>
+                <a href="~/Admin/Home/RemoveUser" class="btn btn-danger">Sil</a>
+                <a href="~/Admin/Home/EditUser" class="btn btn-success">Düzenle</a>
+            </td>
+        </tr>
+    }
+</table>
+<br />
+<a href="~/Admin/Home/NewUser" class="btn btn-primary">Yeni Kullanıcı Ekle</a>
