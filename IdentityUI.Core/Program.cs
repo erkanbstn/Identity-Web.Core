@@ -11,18 +11,6 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("Sql"));
 });
 builder.Services.AddIdentityWithExt();
-builder.Services.AddIdentity<AppUser, AppRole>(opt =>
-{
-    opt.User.RequireUniqueEmail = true;
-    opt.User.AllowedUserNameCharacters = "abcdefghijklmnoprstuvwxyz1234567890_";
-
-    opt.Password.RequiredLength = 6;
-    opt.Password.RequireNonAlphanumeric = false;
-    opt.Password.RequireLowercase = true;
-    opt.Password.RequireUppercase = false;
-    opt.Password.RequireDigit = false;
-
-}).AddEntityFrameworkStores<AppDbContext>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
