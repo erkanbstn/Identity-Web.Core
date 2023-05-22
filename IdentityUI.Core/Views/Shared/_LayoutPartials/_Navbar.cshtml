@@ -1,0 +1,23 @@
+﻿<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+    <ul class="navbar-nav flex-grow-1">
+
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-route-returnurl="/Auth/SignIn" asp-area="" asp-controller="Auth" asp-action="SignOut">Çıkış Yap</a>
+            </li>
+        }
+        else
+        {
+
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="SignUp">Kayıt Ol</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="SignIn">Giriş Yap</a>
+            </li>
+        }
+    </ul>
+</div>

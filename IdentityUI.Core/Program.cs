@@ -11,6 +11,16 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("Sql"));
 });
 builder.Services.AddIdentityWithExt();
+builder.Services.ConfigureApplicationCookie(opt =>
+{
+    var cookieBuilder = new CookieBuilder();
+    cookieBuilder.Name = "IdentityCookie";
+    opt.LoginPath = new PathString("/Auth/SignIn");
+    opt.Cookie = cookieBuilder;
+    opt.ExpireTimeSpan = TimeSpan.FromDays(60);
+    opt.SlidingExpiration = true;
+    opt.LogoutPath = new PathString("/Auth/SignOut");
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

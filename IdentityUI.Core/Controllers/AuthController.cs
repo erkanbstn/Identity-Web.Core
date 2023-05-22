@@ -15,7 +15,10 @@ namespace IdentityUI.Core.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
-
+        public IActionResult Index()
+        {
+            return View();
+        }
         public IActionResult SignIn()
         {
             return View();
@@ -27,7 +30,7 @@ namespace IdentityUI.Core.Controllers
         [HttpPost]
         public async Task<IActionResult> SignIn(SignInViewModel signInViewModel, string returnUrl = null)
         {
-            returnUrl = returnUrl ?? Url.Action("Index", "Home");
+            returnUrl = returnUrl ?? Url.Action("Index", "Member");
             var hasUser = await _userManager.FindByEmailAsync(signInViewModel.Email);
 
             if (hasUser == null)
@@ -70,10 +73,9 @@ namespace IdentityUI.Core.Controllers
 
             return View();
         }
-        public async Task<IActionResult> SignOut()
+        public async Task SignOut()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("SignIn");
         }
 
     }
