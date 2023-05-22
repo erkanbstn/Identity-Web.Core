@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using IdentityUI.Core.Extensions;
 using NuGet.Common;
 using IdentityUI.Core.Services;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace IdentityUI.Core.Controllers
 {
@@ -91,6 +92,42 @@ namespace IdentityUI.Core.Controllers
             //}
             ModelState.AddModelErrorList(result.Errors.Select(b => b.Description).ToList());
 
+            return View();
+        }
+        public async Task<IActionResult> ResetPassword(string userId, string token)
+        {
+            TempData["SuccessMessage"] = null;
+            TempData["userId"] = userId;
+            TempData["token"] = token;
+            var hasUser = await _userManager.FindByIdAsync(userId);
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel resetPasswordViewModel)
+        {
+            var userId = TempData["userId"];
+            var token = TempData["token"];
+
+            if(userId==null || token == null)
+            {
+                throw new Exception("Bir Hata Meydana Geldi");
+            }
+
+            var hasUser = await _userManager.FindByIdAsync(userId.ToString());
+            if (hasUser == null)
+            {
+                ModelState.AddModelError(string.Empty, "Kullanıcı Bulunamamıştır");
+                return View();
+            }
+            var result = await _userManager.ResetPasswordAsync(hasUser, token.ToString(), resetPasswordViewModel.Password);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Şifreniz Başarıyla Yenilenmiştir";
+            }
+            else
+            {
+                ModelState.AddModelErrorList(result.Errors.Select(b => b.Description).ToList());
+            }
             return View();
         }
         public async Task SignOut()
