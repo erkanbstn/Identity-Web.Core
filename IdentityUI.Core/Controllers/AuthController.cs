@@ -3,29 +3,49 @@ using IdentityUI.Core.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using IdentityUI.Core.Extensions;
+using NuGet.Common;
+using IdentityUI.Core.Services;
+
 namespace IdentityUI.Core.Controllers
 {
     public class AuthController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        private readonly IEmailService _emailService;
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
-        public IActionResult Index()
+        public IActionResult SignIn()
         {
             return View();
         }
-        public IActionResult SignIn()
+        public IActionResult ForgetPassword()
         {
             return View();
         }
         public IActionResult SignUp()
         {
             return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel resetPasswordViewModel)
+        {
+            var hasUser = await _userManager.FindByEmailAsync(resetPasswordViewModel.Email);
+            if (hasUser == null)
+            {
+                ModelState.AddModelError(string.Empty, "Bu Emaile Sahip Kullanıcı Bulunamamıştır.");
+                return View();
+            }
+            string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
+            var passwordResetLink = Url.Action("ResetPassword", "Auth", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
+            await _emailService.SendResetPasswordEmail(passwordResetLink, hasUser.Email);
+            // https://localhost:7278?userId=1&token=asdasddadasd
+            TempData["success"] = "Şifre Yenileme Linki E-Posta Adresinize Gönderilmiştir.";
+            return RedirectToAction("ForgetPassword");
         }
         [HttpPost]
         public async Task<IActionResult> SignIn(SignInViewModel signInViewModel, string returnUrl = null)
@@ -49,7 +69,7 @@ namespace IdentityUI.Core.Controllers
                 return View();
             }
 
-            ModelState.AddModelErrorList(new List<string> { $"Email veya Parola Yanlıştır.", $"Başarısız Giriş Sayısı : { await _userManager.GetAccessFailedCountAsync(hasUser)}" });
+            ModelState.AddModelErrorList(new List<string> { $"Email veya Parola Yanlıştır.", $"Başarısız Giriş Sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)}" });
             return View();
         }
         [HttpPost]

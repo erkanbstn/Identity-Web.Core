@@ -1,6 +1,7 @@
 ﻿using IdentityUI.Core.CustomValidations;
 using IdentityUI.Core.Localization;
 using IdentityUI.Core.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace IdentityUI.Core.Extensions
 {
@@ -8,6 +9,11 @@ namespace IdentityUI.Core.Extensions
     {
         public static void AddIdentityWithExt(this IServiceCollection services)
         {
+            services.Configure<DataProtectionTokenProviderOptions>(opt =>
+            {
+                opt.TokenLifespan = TimeSpan.FromHours(2);
+            });
+
             services.AddIdentity<AppUser, AppRole>(opt =>
             {
                 opt.User.RequireUniqueEmail = true;
@@ -22,7 +28,11 @@ namespace IdentityUI.Core.Extensions
                 opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3);
                 opt.Lockout.MaxFailedAccessAttempts = 3;
 
-            }).AddPasswordValidator<PasswordValidator>().AddUserValidator<UserValidator>().AddErrorDescriber<LocalizationIdentityErrorDescriber>().AddEntityFrameworkStores<AppDbContext>();
+            }).AddPasswordValidator<PasswordValidator>()
+            .AddUserValidator<UserValidator>()
+            .AddErrorDescriber<LocalizationIdentityErrorDescriber>()
+            .AddDefaultTokenProviders()
+            .AddEntityFrameworkStores<AppDbContext>();
         }
     }
 }

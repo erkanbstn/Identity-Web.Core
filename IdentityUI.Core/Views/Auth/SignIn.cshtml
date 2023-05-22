@@ -2,10 +2,15 @@
 @{
     ViewData["Title"] = "SignIn";
 }
+@section Scripts
+    {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
 <h1>Identity Core Login</h1>
 <br />
 <hr />
-<form method="post" asp-route-returnurl="@Context.Request.Query["returnURL"]">
+<div class="row">
+    <form method="post" asp-route-returnurl="@Context.Request.Query["returnURL"]">
     <div class="mb-3">
         <label for="exampleInputEmail1" class="form-label">Email</label>
         <input type="email" value="erkanbstn34@gmail.com" class="form-control" asp-for="Email" id="exampleInputEmail1" aria-describedby="emailHelp">
@@ -14,11 +19,15 @@
         <label for="exampleInputPassword1" class="form-label">Parola</label>
         <input type="password" value="Erkan123." class="form-control" asp-for="Password" id="exampleInputPassword1">
     </div>
-    <div class="mb-3 form-check">
+   <div class="row">
+        <div class="mb-3 form-check">
         <input type="checkbox" asp-for="RememberMe" class="form-check-input" id="exampleCheck1">
         <label class="form-check-label" for="exampleCheck1">Beni Hatırla</label>
+        <a class="btn btn-outline-secondary btn-sm float-end" asp-controller="Auth" asp-action="ForgetPassword">Şifremi Unuttum</a>
     </div>
+   </div>
     <br />
     <div class="alert alert-danger" asp-validation-summary="ModelOnly"></div>
     <button type="submit" class="btn btn-primary">Giriş Yap</button>
 </form>
+</div>
