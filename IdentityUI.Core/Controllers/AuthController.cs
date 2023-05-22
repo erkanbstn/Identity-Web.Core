@@ -122,6 +122,7 @@ namespace IdentityUI.Core.Controllers
             var result = await _userManager.ResetPasswordAsync(hasUser, token.ToString(), resetPasswordViewModel.Password);
             if (result.Succeeded)
             {
+                await _userManager.UpdateSecurityStampAsync(hasUser);
                 TempData["SuccessMessage"] = "Şifreniz Başarıyla Yenilenmiştir";
             }
             else
