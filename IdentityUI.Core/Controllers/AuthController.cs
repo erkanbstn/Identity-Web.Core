@@ -2,7 +2,7 @@
 using IdentityUI.Core.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
+using IdentityUI.Core.Extensions;
 namespace IdentityUI.Core.Controllers
 {
     public class AuthController : Controller
@@ -25,8 +25,28 @@ namespace IdentityUI.Core.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> SignIn(int id)
+        public async Task<IActionResult> SignIn(SignInViewModel signInViewModel, string returnUrl = null)
         {
+            returnUrl = returnUrl ?? Url.Action("Index", "Home");
+            var hasUser = await _userManager.FindByEmailAsync(signInViewModel.Email);
+
+            if (hasUser == null)
+            {
+                ModelState.AddModelError(string.Empty, "Email veya Parola Yanlıştır.");
+                return View();
+            }
+            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, signInViewModel.Password, signInViewModel.RememberMe, true);
+            if (signInResult.Succeeded)
+            {
+                return Redirect(returnUrl);
+            }
+            if (signInResult.IsLockedOut)
+            {
+                ModelState.AddModelErrorList(new List<string> { "3 Dakika Boyunca Giriş Yapamazsınız Lütfen Daha Sonra Tekrar Deneyin." });
+                return View();
+            }
+
+            ModelState.AddModelErrorList(new List<string> { $"Email veya Parola Yanlıştır.", $"Başarısız Giriş Sayısı : { await _userManager.GetAccessFailedCountAsync(hasUser)}" });
             return View();
         }
         [HttpPost]
@@ -42,10 +62,12 @@ namespace IdentityUI.Core.Controllers
                 ViewBag.successmessage = "Üyelik Kayıt İşlemi Başarıyla Gerçekleştirildi.";
                 return View();
             }
-            foreach (IdentityError item in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, item.Description);
-            }
+            //foreach (IdentityError item in result.Errors)
+            //{
+            //    ModelState.AddModelError(string.Empty, item.Description);
+            //}
+            ModelState.AddModelErrorList(result.Errors.Select(b => b.Description).ToList());
+
             return View();
         }
         public async Task<IActionResult> SignOut()

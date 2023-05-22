@@ -1,4 +1,6 @@
-﻿using IdentityUI.Core.Models;
+﻿using IdentityUI.Core.CustomValidations;
+using IdentityUI.Core.Localization;
+using IdentityUI.Core.Models;
 
 namespace IdentityUI.Core.Extensions
 {
@@ -17,7 +19,10 @@ namespace IdentityUI.Core.Extensions
                 opt.Password.RequireUppercase = false;
                 opt.Password.RequireDigit = false;
 
-            }).AddEntityFrameworkStores<AppDbContext>();
-        } 
+                opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3);
+                opt.Lockout.MaxFailedAccessAttempts = 3;
+
+            }).AddPasswordValidator<PasswordValidator>().AddUserValidator<UserValidator>().AddErrorDescriber<LocalizationIdentityErrorDescriber>().AddEntityFrameworkStores<AppDbContext>();
+        }
     }
 }

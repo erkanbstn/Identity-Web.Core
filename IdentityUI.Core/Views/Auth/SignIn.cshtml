@@ -1,4 +1,4 @@
-﻿@model SignUpViewModel
+﻿@model SignInViewModel
 @{
     ViewData["Title"] = "SignIn";
 }
@@ -7,17 +7,18 @@
 <hr />
 <form method="post">
     <div class="mb-3">
-        <label for="exampleInputEmail1" class="form-label">Kullanıcı Adı</label>
-        <input type="text" class="form-control" asp-for="UserName" id="exampleInputEmail1" aria-describedby="emailHelp">
-    </div>
-    <div class="mb-3">
-        <label for="exampleInputEmail1" class="form-label">Email Adresi</label>
+        <label for="exampleInputEmail1" class="form-label">Email</label>
         <input type="email" class="form-control" asp-for="Email" id="exampleInputEmail1" aria-describedby="emailHelp">
-        <div id="emailHelp" class="form-text">Emailinizi Kimseyle Paylaşmayacağız.</div>
     </div>
     <div class="mb-3">
         <label for="exampleInputPassword1" class="form-label">Parola</label>
         <input type="password" class="form-control" asp-for="Password" id="exampleInputPassword1">
     </div>
-    <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+    <div class="mb-3 form-check">
+        <input type="checkbox" asp-for="RememberMe" class="form-check-input" id="exampleCheck1">
+        <label class="form-check-label" for="exampleCheck1">Beni Hatırla</label>
+    </div>
+    <br />
+    <div class="alert alert-danger" asp-validation-summary="ModelOnly"></div>
+    <button type="submit" class="btn btn-primary">Giriş Yap</button>
 </form>

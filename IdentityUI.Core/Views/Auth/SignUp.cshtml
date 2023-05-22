@@ -17,6 +17,7 @@
     </div>
 }
 <br />
+<br />
 <form method="post">
     <div class="mb-3">
         <label for="exampleInputEmail1" class="form-label">Kullanıcı Adı</label>
@@ -44,7 +45,8 @@
         <input type="password" class="form-control" asp-for="PasswordConfirm" id="exampleInputPassword1">
         <span asp-validation-for="PasswordConfirm" class="text-danger"></span>
     </div>
-    <div asp-validation-summary="ModelOnly"></div>
+    <br />
+    <div class="alert alert-danger" asp-validation-summary="ModelOnly"></div>
     @* <div class="mb-3 form-check">
     <input type="checkbox" class="form-check-input" id="exampleCheck1">
     <label class="form-check-label" for="exampleCheck1">Beni Hatırla</label>
