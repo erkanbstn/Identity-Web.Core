@@ -9,9 +9,19 @@
 </h1>
 <br />
 <br />
+<div class="row">
+    <div class="col-md-4 offset-md-4 text-center">
+        <user-picture-thumbnail picture-url="@Model.Picture">
+
+        </user-picture-thumbnail>
+    </div>
+</div>
+<br />
+<br />
 <table class="table table-hover">
     <thead>
         <tr>
+            <th>Görsel</th>
             <th>Kullanıcı Adı</th>
             <th>Email</th>
             <th>Telefon</th>
@@ -20,6 +30,7 @@
     </thead>
     <tbody>
         <tr>
+            
             <td>
                 @Model.UserName
             </td>

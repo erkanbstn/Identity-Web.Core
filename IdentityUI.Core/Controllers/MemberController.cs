@@ -26,7 +26,7 @@ namespace IdentityUI.Core.Controllers
         public async Task<IActionResult> Index()
         {
             var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            var userViewModel = new UserViewModel { Email = currentUser.Email, UserName = currentUser.UserName, Phone = currentUser.PhoneNumber };
+            var userViewModel = new UserViewModel { Email = currentUser.Email, UserName = currentUser.UserName, Phone = currentUser.PhoneNumber, Picture = currentUser.Picture };
             return View(userViewModel);
         }
         public IActionResult ReturnTest()
