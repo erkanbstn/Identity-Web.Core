@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "AccessDenied";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+@using System.Security.Claims
+<div class="alert-info">
+    <h1>@ViewBag.message</h1>
+    <br />
+    @if (User.HasClaim(b => b.Type == ClaimTypes.Role && b.Value == "Admin"))
+    {
+        <a href="~/Admin/Home/UserList" class="btn btn-success">Admin Ana Sayfasına Dön</a>
+    }
+</div>

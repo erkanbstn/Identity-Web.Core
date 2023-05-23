@@ -135,6 +135,10 @@ namespace IdentityUI.Core.Controllers
         {
             await _signInManager.SignOutAsync();
         }
-
+        public IActionResult AccessDenied(string ReturnUrl)
+        {
+            ViewBag.message = "Bu Sayfayı Görüntülemeye Yetkiniz Yoktur.";
+            return View();
+        }
     }
 }
