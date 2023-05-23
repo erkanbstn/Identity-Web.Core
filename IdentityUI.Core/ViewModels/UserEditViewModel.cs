@@ -14,6 +14,6 @@ namespace IdentityUI.Core.ViewModels
         public string? City { get; set; }
         public IFormFile? Picture { get; set; }
         public DateTime? BirthDay { get; set; }
-        public byte? Gender { get; set; }
+        public Gender? Gender { get; set; }
     }
 }

@@ -10,8 +10,14 @@
 <h1>Identity Core Edit User</h1>
 <br />
 <hr />
+@if (TempData["Success2"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success2"]
+    </div>
+}
 <div>
-    <form method="post" asp-route-returnurl="@Context.Request.Query["returnURL"]" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="exampleInputPassword1" class="form-label">Kullanıcı Adı</label>
             <input type="text" class="form-control" asp-for="UserName" id="exampleInputPassword1">
@@ -28,6 +34,11 @@
             <label for="exampleInputPassword1" class="form-label">Telefon</label>
             <input type="text" class="form-control" asp-for="Phone" id="exampleInputPassword1">
             <span asp-validation-for="Phone" class="text-danger"></span>
+        </div>
+        <br />
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Şehir</label>
+            <input type="text" class="form-control" asp-for="City" id="exampleInputPassword1">
         </div>
         <br />
         <div class="mb-3">
@@ -52,9 +63,3 @@
     </form>
 </div>
 <br />
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
-    </div>
-}

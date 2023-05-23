@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.FileProviders;
 
 namespace IdentityUI.Core.Controllers
 {
@@ -13,11 +14,13 @@ namespace IdentityUI.Core.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IFileProvider _fileProvider;
 
-        public MemberController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public MemberController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IFileProvider fileProvider)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _fileProvider = fileProvider;
         }
 
         public async Task<IActionResult> Index()
@@ -48,14 +51,14 @@ namespace IdentityUI.Core.Controllers
                 ModelState.AddModelError(string.Empty, "Eski Şifreniz Yanlıştır.");
                 return View();
             }
-            var result = await _userManager.ChangePasswordAsync(currentUser, passwordChangeViewModel.OldPassword,passwordChangeViewModel.NewPassword);
+            var result = await _userManager.ChangePasswordAsync(currentUser, passwordChangeViewModel.OldPassword, passwordChangeViewModel.NewPassword);
             if (!result.Succeeded)
             {
-                ModelState.AddModelErrorList(result.Errors.Select(b=>b.Description).ToList());
+                ModelState.AddModelErrorList(result.Errors.Select(b => b.Description).ToList());
                 return View();
             }
             await _signInManager.SignOutAsync();
-            await _signInManager.PasswordSignInAsync(currentUser,passwordChangeViewModel.NewPassword,true,false);
+            await _signInManager.PasswordSignInAsync(currentUser, passwordChangeViewModel.NewPassword, true, false);
             await _userManager.UpdateSecurityStampAsync(currentUser);
             TempData["Success"] = "Parolanız Başarıyla Değiştirildi";
             return RedirectToAction("PasswordChange");
@@ -69,11 +72,48 @@ namespace IdentityUI.Core.Controllers
                 UserName = currentUser.UserName,
                 Email = currentUser.Email,
                 Phone = currentUser.PhoneNumber,
-                Gender=currentUser.Gender,
-                BirthDay=currentUser.BirthDay,
-                City=currentUser.City
+                Gender = currentUser.Gender,
+                BirthDay = currentUser.BirthDay,
+                City = currentUser.City
             };
             return View(userEditViewModel);
         }
+        [HttpPost]
+        public async Task<IActionResult> UserEdit(UserEditViewModel userEditViewModel)
+        {
+            ViewBag.genderlist = new SelectList(Enum.GetNames(typeof(Gender)));
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
+            currentUser.UserName = userEditViewModel.UserName;
+            currentUser.Email = userEditViewModel.Email;
+            currentUser.BirthDay = userEditViewModel.BirthDay;
+            currentUser.PhoneNumber = userEditViewModel.Phone;
+            currentUser.Gender = userEditViewModel.Gender;
+            currentUser.City = userEditViewModel.City;
+            if (userEditViewModel.Picture != null && userEditViewModel.Picture.Length > 0)
+            {
+                var wwwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
+                var randomFileName = $"{Guid.NewGuid()}{Path.GetExtension(userEditViewModel.Picture.FileName)}";
+                var newPicturePath = Path.Combine(wwwrootFolder.First(b => b.Name == "UserPictures").PhysicalPath, randomFileName);
+                using var stream = new FileStream(newPicturePath, FileMode.Create);
+                await userEditViewModel.Picture.CopyToAsync(stream);
+                currentUser.Picture = randomFileName;
+            }
+            var updateToUser = await _userManager.UpdateAsync(currentUser);
+            if (!updateToUser.Succeeded)
+            {
+                ModelState.AddModelErrorList(updateToUser.Errors);
+                return View();
+            }
+            await _userManager.UpdateSecurityStampAsync(currentUser);
+            await _signInManager.SignOutAsync();
+            await _signInManager.SignInAsync(currentUser, true);
+            TempData["Success2"] = "Üye Bilgileri Başarıyla Değiştirildi";
+            return View(userEditViewModel);
+        }
+
     }
 }
