@@ -1,0 +1,38 @@
+﻿@model List<AssignToRoleViewModel>
+@{
+    ViewData["Title"] = "AssignToRole";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+
+@section Scripts
+    {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+<h1>Identity Core Assign Role</h1>
+<br />
+<hr />
+<div>
+    <form method="post" asp-route-userId="@ViewBag.userId">
+        <div class="mb-3">
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" asp-for="@Model[i].Exist" />
+                    <label class="form-check-label">@Model[i].Name</label>
+                    <input type="hidden" asp-for="@Model[i].Name" />
+                    <input type="hidden" asp-for="@Model[i].Id" />
+                </div>
+            }
+        </div>
+        <br />
+        <div class="alert alert-danger" asp-validation-summary="ModelOnly"></div>
+        <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+    </form>
+</div>
+<br />
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}

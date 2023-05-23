@@ -4,6 +4,7 @@ using IdentityUI.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace IdentityUI.Core.Areas.Admin.Controllers
 {
@@ -18,6 +19,7 @@ namespace IdentityUI.Core.Areas.Admin.Controllers
             _roleManager = roleManager;
         }
 
+        // Users
         public async Task<IActionResult> UserList()
         {
             var userList = await _userManager.Users.ToListAsync();
@@ -29,6 +31,8 @@ namespace IdentityUI.Core.Areas.Admin.Controllers
             }).ToList();
             return View(userViewModelList);
         }
+
+        // Roles
         public async Task<IActionResult> RoleList()
         {
             var roles = await _roleManager.Roles.Select(b => new RoleViewModel()
@@ -73,7 +77,7 @@ namespace IdentityUI.Core.Areas.Admin.Controllers
                 return View();
             }
             var role = await _roleManager.FindByIdAsync(roleViewModel.Id);
-            role.Name=roleViewModel.Name;
+            role.Name = roleViewModel.Name;
             await _roleManager.UpdateAsync(role);
             TempData["Success"] = "Rol Başarıyla Güncellendi";
             return View();
@@ -84,5 +88,45 @@ namespace IdentityUI.Core.Areas.Admin.Controllers
             await _roleManager.DeleteAsync(role);
             return RedirectToAction(nameof(HomeController.RoleList));
         }
+        public async Task<IActionResult> AssignToRole(string id)
+        {
+            var currentUser = await _userManager.FindByIdAsync(id);
+            ViewBag.userId = id;
+            var roles = await _roleManager.Roles.ToListAsync();
+            var userRoles = await _userManager.GetRolesAsync(currentUser);
+            var roleViewModelList = new List<AssignToRoleViewModel>();
+            foreach (var role in roles)
+            {
+                var roleViewModel = new AssignToRoleViewModel()
+                {
+                    Id = role.Id,
+                    Name = role.Name,
+                };
+                if (userRoles.Contains(role.Name))
+                {
+                    roleViewModel.Exist = true;
+                }
+                roleViewModelList.Add(roleViewModel);
+            }
+            return View(roleViewModelList);
+        }
+        [HttpPost]
+        public async Task<IActionResult> AssignToRole(string userId, List<AssignToRoleViewModel> assignToRoleViewModel)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            foreach (var item in assignToRoleViewModel)
+            {
+                if (item.Exist)
+                {
+                    await _userManager.AddToRoleAsync(user, item.Name);
+                }
+                else
+                {
+                    await _userManager.RemoveFromRoleAsync(user, item.Name);
+                }
+            }
+            return RedirectToAction(nameof(HomeController.UserList));
+        }
+
     }
 }
