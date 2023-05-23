@@ -1,6 +1,8 @@
-﻿@{
+﻿
+@{
     Layout = null;
 }
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,8 +20,10 @@
         <div class="border-end bg-white" id="sidebar-wrapper">
             <div class="sidebar-heading border-bottom bg-light">Core Identity</div>
             <div class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="~/Admin/Home/UserList">Üyeler</a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="~/Admin/Home/RoleList">Roller</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="~/Member/Index">Bilgilerim</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="~/Member/PasswordChange">Parola Değiştir</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="~/Member/UserEdit">Bilgilerimi Düzenle</a>
+                <a class="nav-link text-dark" asp-route-returnurl="/Auth/SignIn" asp-area="" asp-controller="Auth" asp-action="SignOut">Çıkış Yap</a>
             </div>
         </div>
         <div id="page-content-wrapper">
@@ -35,6 +39,3 @@
 
 </body>
 </html>
-
-
-
