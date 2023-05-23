@@ -4,6 +4,7 @@ using IdentityUI.Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace IdentityUI.Core.Controllers
 {
@@ -58,6 +59,21 @@ namespace IdentityUI.Core.Controllers
             await _userManager.UpdateSecurityStampAsync(currentUser);
             TempData["Success"] = "Parolanız Başarıyla Değiştirildi";
             return RedirectToAction("PasswordChange");
+        }
+        public async Task<IActionResult> UserEdit()
+        {
+            ViewBag.genderlist = new SelectList(Enum.GetNames(typeof(Gender)));
+            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userEditViewModel = new UserEditViewModel()
+            {
+                UserName = currentUser.UserName,
+                Email = currentUser.Email,
+                Phone = currentUser.PhoneNumber,
+                Gender=currentUser.Gender,
+                BirthDay=currentUser.BirthDay,
+                City=currentUser.City
+            };
+            return View(userEditViewModel);
         }
     }
 }
