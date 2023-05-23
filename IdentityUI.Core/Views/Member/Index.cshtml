@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Admin.cshtml";
 }
 @model UserViewModel
 
@@ -15,6 +15,7 @@
             <th>Kullanıcı Adı</th>
             <th>Email</th>
             <th>Telefon</th>
+            <th>Aksiyon</th>
         </tr>
     </thead>
     <tbody>
@@ -27,6 +28,9 @@
             </td>
             <td>
                 @Model.Phone
+            </td>
+            <td>
+                <a href="~/Member/PasswordChange" class="btn btn-warning">Parola Değiştir</a>
             </td>
         </tr>
     </tbody>
