@@ -1,6 +1,6 @@
-﻿namespace IdentityUI.Core.Areas.Admin.Models
+﻿namespace IdentityUI.Core.Core.ViewModels
 {
-    public class UserViewModel
+    public class UserAdminViewModel
     {
         public string? Id { get; set; }
         public string? Name { get; set; }

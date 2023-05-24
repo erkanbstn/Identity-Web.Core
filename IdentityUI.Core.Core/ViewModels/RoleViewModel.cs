@@ -1,7 +1,7 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 
-namespace IdentityUI.Core.Areas.Admin.Models
+namespace IdentityUI.Core.Core.ViewModels
 {
     public class RoleViewModel
     {

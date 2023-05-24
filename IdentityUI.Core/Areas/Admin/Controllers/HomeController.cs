@@ -1,6 +1,7 @@
-﻿using IdentityUI.Core.Areas.Admin.Models;
+﻿using IdentityUI.Core.Core.ViewModels;
 using IdentityUI.Core.Extensions;
 using IdentityUI.Core.Repository.Models;
+using IdentityUI.Core.Service.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,36 +14,20 @@ namespace IdentityUI.Core.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly RoleManager<AppRole> _roleManager;
-        public HomeController(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+        private readonly IHomeService _homeService;
+        public HomeController(IHomeService homeService)
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
+            _homeService = homeService;
         }
-
         // Users
         public async Task<IActionResult> UserList()
         {
-            var userList = await _userManager.Users.ToListAsync();
-            var userViewModelList = userList.Select(b => new UserViewModel()
-            {
-                Email = b.Email,
-                Id = b.Id,
-                Name = b.UserName
-            }).ToList();
-            return View(userViewModelList);
+            return View(await _homeService.UserToListAsync());
         }
-
         // Roles
         public async Task<IActionResult> RoleList()
         {
-            var roles = await _roleManager.Roles.Select(b => new RoleViewModel()
-            {
-                Id = b.Id,
-                Name = b.Name
-            }).ToListAsync();
-            return View(roles);
+            return View(await _homeService.RoleViewModelToListAsync());
         }
         public IActionResult NewRole()
         {
@@ -50,16 +35,13 @@ namespace IdentityUI.Core.Areas.Admin.Controllers
         }
         [Authorize(Roles = "Role-Action")]
         [HttpPost]
-        public async Task<IActionResult> NewRole(AddRoleViewMode addRoleViewMode)
+        public async Task<IActionResult> NewRole(AddRoleViewModel addRoleViewMode)
         {
             if (!ModelState.IsValid)
             {
                 return View();
             }
-            var result = await _roleManager.CreateAsync(new AppRole()
-            {
-                Name = addRoleViewMode.Name,
-            });
+            var result = await _homeService.CreateRoleAsync(addRoleViewMode.Name);
             if (!result.Succeeded)
             {
                 ModelState.AddModelErrorList(result.Errors);
@@ -69,8 +51,7 @@ namespace IdentityUI.Core.Areas.Admin.Controllers
         }
         public async Task<IActionResult> EditRole(string id)
         {
-            var role = await _roleManager.FindByIdAsync(id);
-            return View(new RoleViewModel() { Id = role.Id, Name = role.Name });
+            return View(await _homeService.ByRoleViewModelToListAsync(id));
         }
         [HttpPost]
         [Authorize(Roles = "Role-Action")]
@@ -80,55 +61,35 @@ namespace IdentityUI.Core.Areas.Admin.Controllers
             {
                 return View();
             }
-            var role = await _roleManager.FindByIdAsync(roleViewModel.Id);
-            role.Name = roleViewModel.Name;
-            await _roleManager.UpdateAsync(role);
+            await _homeService.UpdateRoleAsync(roleViewModel.Id, roleViewModel.Name);
             TempData["Success"] = "Rol Başarıyla Güncellendi";
             return View();
         }
         [Authorize(Roles = "Role-Action")]
         public async Task<IActionResult> RemoveRole(string id)
         {
-            var role = await _roleManager.FindByIdAsync(id);
-            await _roleManager.DeleteAsync(role);
+            await _homeService.DeleteRoleAsync(id);
             return RedirectToAction(nameof(HomeController.RoleList));
         }
         public async Task<IActionResult> AssignToRole(string id)
         {
-            var currentUser = await _userManager.FindByIdAsync(id);
             ViewBag.userId = id;
-            var roles = await _roleManager.Roles.ToListAsync();
-            var userRoles = await _userManager.GetRolesAsync(currentUser);
-            var roleViewModelList = new List<AssignToRoleViewModel>();
-            foreach (var role in roles)
-            {
-                var roleViewModel = new AssignToRoleViewModel()
-                {
-                    Id = role.Id,
-                    Name = role.Name,
-                };
-                if (userRoles.Contains(role.Name))
-                {
-                    roleViewModel.Exist = true;
-                }
-                roleViewModelList.Add(roleViewModel);
-            }
-            return View(roleViewModelList);
+            return View(await _homeService.GetAssignToRoleViewModel(id));
         }
         [HttpPost]
         [Authorize(Roles = "Role-Action")]
         public async Task<IActionResult> AssignToRole(string userId, List<AssignToRoleViewModel> assignToRoleViewModel)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+
             foreach (var item in assignToRoleViewModel)
             {
                 if (item.Exist)
                 {
-                    await _userManager.AddToRoleAsync(user, item.Name);
+                    await _homeService.AddToRoleAsync(item.Name, userId);
                 }
                 else
                 {
-                    await _userManager.RemoveFromRoleAsync(user, item.Name);
+                    await _homeService.RemoveFromRoleAsync(item.Name, userId);
                 }
             }
             return RedirectToAction(nameof(HomeController.UserList));

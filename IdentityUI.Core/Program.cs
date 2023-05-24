@@ -29,6 +29,8 @@ builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
     opt.ValidationInterval = TimeSpan.FromMinutes(30);
 });
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddAuthorization(opt =>
 {
     opt.AddPolicy("ÝstanbulPolicy", policy =>
