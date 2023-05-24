@@ -3,6 +3,7 @@ using IdentityUI.Core.Extensions;
 using IdentityUI.Core.Models;
 using IdentityUI.Core.OptionsModel;
 using IdentityUI.Core.Requirements;
+using IdentityUI.Core.Seeds;
 using IdentityUI.Core.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -19,10 +20,10 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("Sql"));
 });
-builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
-{
-    opt.ValidationInterval = TimeSpan.FromMinutes(30);
-});
+    builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
+    {
+        opt.ValidationInterval = TimeSpan.FromMinutes(30);
+    });
 builder.Services.AddAuthorization(opt =>
 {
     opt.AddPolicy("ÝstanbulPolicy", policy =>
@@ -33,8 +34,13 @@ builder.Services.AddAuthorization(opt =>
     {
         policy.AddRequirements(new ExchangeExpireRequirement());
     });
+    opt.AddPolicy("ViolencePolicy", policy =>
+    {
+        policy.AddRequirements(new ViolenceRequirement() { ThreshOldAge=18});
+    });
 });
 builder.Services.AddScoped<IAuthorizationHandler, ExchangeExpireRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, ViolenceRequirementHandler>();
 builder.Services.AddScoped<IClaimsTransformation, UserClaimProvider>();
 builder.Services.AddIdentityWithExt();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -51,9 +57,14 @@ builder.Services.ConfigureApplicationCookie(opt =>
     opt.AccessDeniedPath = new PathString("/Auth/AccessDenied");
 });
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
+    await PermissionSeed.Seed(roleManager);
+}
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.

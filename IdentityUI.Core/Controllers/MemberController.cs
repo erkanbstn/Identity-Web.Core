@@ -41,6 +41,7 @@ namespace IdentityUI.Core.Controllers
             return View();
         }
         [HttpPost]
+        [Authorize(Policy = "ViolencePolicy")]
         public async Task<IActionResult> PasswordChange(PasswordChangeViewModel passwordChangeViewModel)
         {
             if (!ModelState.IsValid)

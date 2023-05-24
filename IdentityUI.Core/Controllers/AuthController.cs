@@ -3,9 +3,7 @@ using IdentityUI.Core.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using IdentityUI.Core.Extensions;
-using NuGet.Common;
 using IdentityUI.Core.Services;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Security.Claims;
 
 namespace IdentityUI.Core.Controllers
