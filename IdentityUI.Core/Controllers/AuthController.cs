@@ -6,6 +6,7 @@ using IdentityUI.Core.Extensions;
 using NuGet.Common;
 using IdentityUI.Core.Services;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Security.Claims;
 
 namespace IdentityUI.Core.Controllers
 {
@@ -81,6 +82,19 @@ namespace IdentityUI.Core.Controllers
                 return View();
             }
             var result = await _userManager.CreateAsync(new() { UserName = signUpViewModel.UserName, PhoneNumber = signUpViewModel.Phone, Email = signUpViewModel.Email }, signUpViewModel.PasswordConfirm);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelErrorList(result.Errors.Select(b => b.Description).ToList());
+                return View();
+            }
+            var exchangeExpireClaim = new Claim("ExchangeExpireDate", DateTime.Now.AddDays(10).ToString());
+            var user = await _userManager.FindByNameAsync(signUpViewModel.UserName);
+            var claimResult = await _userManager.AddClaimAsync(user, exchangeExpireClaim);
+            if (!claimResult.Succeeded)
+            {
+                ModelState.AddModelErrorList(claimResult.Errors.Select(b => b.Description).ToList());
+                return View();
+            }
             if (result.Succeeded)
             {
                 ViewBag.successmessage = "Üyelik Kayıt İşlemi Başarıyla Gerçekleştirildi.";
@@ -108,7 +122,7 @@ namespace IdentityUI.Core.Controllers
             var userId = TempData["userId"];
             var token = TempData["token"];
 
-            if(userId==null || token == null)
+            if (userId == null || token == null)
             {
                 throw new Exception("Bir Hata Meydana Geldi");
             }

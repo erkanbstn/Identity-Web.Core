@@ -114,6 +114,16 @@ namespace IdentityUI.Core.Controllers
             TempData["Success2"] = "Üye Bilgileri Başarıyla Değiştirildi";
             return View(userEditViewModel);
         }
-
+        [Authorize(Policy = "İstanbulPolicy,ExchangePolicy")]
+        public IActionResult UserClaims()
+        {
+            var userClaim = User.Claims.Select(b => new ClaimViewModel()
+            {
+                Issuer = b.Issuer,
+                Value = b.Value,
+                Type = b.Type,
+            }).ToList();
+            return View(userClaim);
+        }
     }
 }

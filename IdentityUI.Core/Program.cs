@@ -1,7 +1,11 @@
+using IdentityUI.Core.ClaimProvider;
 using IdentityUI.Core.Extensions;
 using IdentityUI.Core.Models;
 using IdentityUI.Core.OptionsModel;
+using IdentityUI.Core.Requirements;
 using IdentityUI.Core.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -19,6 +23,19 @@ builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
 {
     opt.ValidationInterval = TimeSpan.FromMinutes(30);
 });
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("ÝstanbulPolicy", policy =>
+    {
+        policy.RequireClaim("city", "Ýstanbul", "Ankara");
+    });
+    opt.AddPolicy("ExchangePolicy", policy =>
+    {
+        policy.AddRequirements(new ExchangeExpireRequirement());
+    });
+});
+builder.Services.AddScoped<IAuthorizationHandler, ExchangeExpireRequirementHandler>();
+builder.Services.AddScoped<IClaimsTransformation, UserClaimProvider>();
 builder.Services.AddIdentityWithExt();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();

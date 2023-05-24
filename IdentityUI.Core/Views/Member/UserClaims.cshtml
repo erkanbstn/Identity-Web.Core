@@ -1,0 +1,22 @@
+﻿@model List<ClaimViewModel>
+@{
+    ViewData["Title"] = "UserClaims";
+    Layout = "~/Views/Shared/_Member.cshtml";
+}
+<h1>Identity Core Claims</h1>
+<br />
+<table class="table table-hover">
+    <tr>
+        <th>Issuer</th>
+        <th>Type</th>
+        <th>Value</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Issuer</td>
+            <td>@item.Type</td>
+            <td>@item.Value</td>
+        </tr>
+    }
+</table>
