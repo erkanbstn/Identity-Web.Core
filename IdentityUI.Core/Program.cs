@@ -19,7 +19,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("Sql"),options =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("Sql"), options =>
     {
         options.MigrationsAssembly("IdentityUI.Core.Repository");
     });
@@ -28,6 +28,7 @@ builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
 {
     opt.ValidationInterval = TimeSpan.FromMinutes(30);
 });
+builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddAuthorization(opt =>
 {
     opt.AddPolicy("ÝstanbulPolicy", policy =>

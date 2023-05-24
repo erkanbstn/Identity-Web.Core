@@ -13,11 +13,13 @@ namespace IdentityUI.Core.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailService _emailService;
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
+        private readonly IMemberService _memberService;
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService, IMemberService memberService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
+            _memberService = memberService;
         }
         public IActionResult SignIn()
         {
@@ -154,7 +156,7 @@ namespace IdentityUI.Core.Controllers
         }
         public async Task SignOut()
         {
-            await _signInManager.SignOutAsync();
+            await _memberService.SignOutAsync();
         }
         public IActionResult AccessDenied(string ReturnUrl)
         {

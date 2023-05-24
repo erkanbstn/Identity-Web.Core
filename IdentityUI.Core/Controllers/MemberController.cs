@@ -4,10 +4,8 @@ using IdentityUI.Core.Repository.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
-using System.Security.Claims;
-using IdentityUI.Core.Core.Models;
+using IdentityUI.Core.Service.Services;
 
 namespace IdentityUI.Core.Controllers
 {
@@ -17,19 +15,19 @@ namespace IdentityUI.Core.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IFileProvider _fileProvider;
-
-        public MemberController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IFileProvider fileProvider)
+        private readonly IMemberService _memberService;
+        private string userName => User.Identity.Name;
+        public MemberController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IFileProvider fileProvider, IMemberService memberService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _fileProvider = fileProvider;
+            _memberService = memberService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            var userViewModel = new UserViewModel { Email = currentUser.Email, UserName = currentUser.UserName, Phone = currentUser.PhoneNumber, Picture = currentUser.Picture };
-            return View(userViewModel);
+            return View(await _memberService.GetUserViewModelByUserNameAsync(userName));
         }
         [Authorize(Policy = "ExchangePolicy")]
         public IActionResult ReturnTest()
@@ -48,93 +46,46 @@ namespace IdentityUI.Core.Controllers
             {
                 return View();
             }
-            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            var checkOldPassword = await _userManager.CheckPasswordAsync(currentUser, passwordChangeViewModel.OldPassword);
-            if (!checkOldPassword)
+            if (!await _memberService.CheckPasswordAsync(userName, passwordChangeViewModel.OldPassword))
             {
                 ModelState.AddModelError(string.Empty, "Eski Şifreniz Yanlıştır.");
                 return View();
             }
-            var result = await _userManager.ChangePasswordAsync(currentUser, passwordChangeViewModel.OldPassword, passwordChangeViewModel.NewPassword);
-            if (!result.Succeeded)
+            var (isSuccess, errors) = await _memberService.ChangePasswordAsync(userName, passwordChangeViewModel.OldPassword, passwordChangeViewModel.NewPassword);
+            if (!isSuccess)
             {
-                ModelState.AddModelErrorList(result.Errors.Select(b => b.Description).ToList());
+                ModelState.AddModelErrorList(errors);
                 return View();
             }
-            await _signInManager.SignOutAsync();
-            await _signInManager.PasswordSignInAsync(currentUser, passwordChangeViewModel.NewPassword, true, false);
-            await _userManager.UpdateSecurityStampAsync(currentUser);
             TempData["Success"] = "Parolanız Başarıyla Değiştirildi";
             return RedirectToAction("PasswordChange");
         }
         public async Task<IActionResult> UserEdit()
         {
-            ViewBag.genderlist = new SelectList(Enum.GetNames(typeof(Gender)));
-            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            var userEditViewModel = new UserEditViewModel()
-            {
-                UserName = currentUser.UserName,
-                Email = currentUser.Email,
-                Phone = currentUser.PhoneNumber,
-                Gender = currentUser.Gender,
-                BirthDay = currentUser.BirthDay,
-                City = currentUser.City
-            };
-            return View(userEditViewModel);
+            ViewBag.genderlist = _memberService.GetGenderSelectListAsync();
+            return View(await _memberService.GetUserEditViewModelAsync(userName));
         }
         [HttpPost]
         [Authorize(Policy = "İstanbulPolicy")]
         public async Task<IActionResult> UserEdit(UserEditViewModel userEditViewModel)
         {
-            ViewBag.genderlist = new SelectList(Enum.GetNames(typeof(Gender)));
+            ViewBag.genderlist = _memberService.GetGenderSelectListAsync();
             if (!ModelState.IsValid)
             {
                 return View();
             }
-            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            currentUser.UserName = userEditViewModel.UserName;
-            currentUser.Email = userEditViewModel.Email;
-            currentUser.BirthDay = userEditViewModel.BirthDay;
-            currentUser.PhoneNumber = userEditViewModel.Phone;
-            currentUser.Gender = userEditViewModel.Gender;
-            currentUser.City = userEditViewModel.City;
-            if (userEditViewModel.Picture != null && userEditViewModel.Picture.Length > 0)
+            var (isSucess,errors) = await _memberService.EditUserAsync(userEditViewModel, userName);
+            if (!isSucess)
             {
-                var wwwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
-                var randomFileName = $"{Guid.NewGuid()}{Path.GetExtension(userEditViewModel.Picture.FileName)}";
-                var newPicturePath = Path.Combine(wwwrootFolder.First(b => b.Name == "UserPictures").PhysicalPath, randomFileName);
-                using var stream = new FileStream(newPicturePath, FileMode.Create);
-                await userEditViewModel.Picture.CopyToAsync(stream);
-                currentUser.Picture = randomFileName;
-            }
-            var updateToUser = await _userManager.UpdateAsync(currentUser);
-            if (!updateToUser.Succeeded)
-            {
-                ModelState.AddModelErrorList(updateToUser.Errors);
+                ModelState.AddModelErrorList(errors);
                 return View();
             }
-            await _userManager.UpdateSecurityStampAsync(currentUser);
-            await _signInManager.SignOutAsync();
-            if (currentUser.BirthDay.HasValue)
-            {
-                await _signInManager.SignInWithClaimsAsync(currentUser, true, new[] { new Claim("birthdate", currentUser.BirthDay.Value.ToString()) });
-            }
-            else
-            {
-                await _signInManager.SignInAsync(currentUser, true);
-            }
             TempData["Success2"] = "Üye Bilgileri Başarıyla Değiştirildi";
-            return View(userEditViewModel);
+            return View(await _memberService.GetUserEditViewModelAsync(userName));
         }
         public IActionResult UserClaims()
         {
-            var userClaim = User.Claims.Select(b => new ClaimViewModel()
-            {
-                Issuer = b.Issuer,
-                Value = b.Value,
-                Type = b.Type,
-            }).ToList();
-            return View(userClaim);
+            return View(_memberService.GetClaimViewModel(User));
         }
     }
 }
