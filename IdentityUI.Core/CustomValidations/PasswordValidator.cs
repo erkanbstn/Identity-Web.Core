@@ -1,4 +1,4 @@
-﻿using IdentityUI.Core.Models;
+﻿using IdentityUI.Core.Repository.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityUI.Core.CustomValidations

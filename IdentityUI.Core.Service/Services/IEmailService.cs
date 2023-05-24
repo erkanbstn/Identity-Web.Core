@@ -1,4 +1,4 @@
-﻿namespace IdentityUI.Core.Services
+﻿namespace IdentityUI.Core.Service.Services
 {
     public interface IEmailService
     {

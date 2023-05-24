@@ -1,4 +1,4 @@
-﻿namespace IdentityUI.Core.Models
+﻿namespace IdentityUI.Core.Core.Models
 {
     public enum Gender
     {

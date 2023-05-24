@@ -1,4 +1,4 @@
-﻿namespace IdentityUI.Core.ViewModels
+﻿namespace IdentityUI.Core.Core.ViewModels
 {
     public class UserViewModel
     {

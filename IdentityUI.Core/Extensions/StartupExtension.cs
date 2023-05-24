@@ -1,6 +1,6 @@
 ﻿using IdentityUI.Core.CustomValidations;
 using IdentityUI.Core.Localization;
-using IdentityUI.Core.Models;
+using IdentityUI.Core.Repository.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityUI.Core.Extensions

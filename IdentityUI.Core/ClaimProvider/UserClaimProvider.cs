@@ -1,4 +1,4 @@
-﻿using IdentityUI.Core.Models;
+﻿using IdentityUI.Core.Repository.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;

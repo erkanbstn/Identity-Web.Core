@@ -1,11 +1,11 @@
 using IdentityUI.Core.ClaimProvider;
 using IdentityUI.Core.Extensions;
-using IdentityUI.Core.Models;
-using IdentityUI.Core.OptionsModel;
-using IdentityUI.Core.Permissions;
+using IdentityUI.Core.Repository.Models;
+using IdentityUI.Core.Core.OptionsModel;
+using IdentityUI.Core.Core.Permissions;
 using IdentityUI.Core.Requirements;
-using IdentityUI.Core.Seeds;
-using IdentityUI.Core.Services;
+using IdentityUI.Core.Repository.Seeds;
+using IdentityUI.Core.Service.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,7 +19,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("Sql"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("Sql"),options =>
+    {
+        options.MigrationsAssembly("IdentityUI.Core.Repository");
+    });
 });
 builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
 {

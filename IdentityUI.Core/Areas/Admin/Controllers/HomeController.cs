@@ -1,6 +1,6 @@
 ﻿using IdentityUI.Core.Areas.Admin.Models;
 using IdentityUI.Core.Extensions;
-using IdentityUI.Core.Models;
+using IdentityUI.Core.Repository.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace IdentityUI.Core.ViewModels
+namespace IdentityUI.Core.Core.ViewModels
 {
     public class ForgetPasswordViewModel
     {

@@ -1,13 +1,13 @@
-﻿using IdentityUI.Core.Extensions;
-using IdentityUI.Core.Models;
-using IdentityUI.Core.ViewModels;
+﻿using IdentityUI.Core.Core.ViewModels;
+using IdentityUI.Core.Extensions;
+using IdentityUI.Core.Repository.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
-using System.Collections.Generic;
 using System.Security.Claims;
+using IdentityUI.Core.Core.Models;
 
 namespace IdentityUI.Core.Controllers
 {

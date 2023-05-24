@@ -1,9 +1,9 @@
-﻿using IdentityUI.Core.OptionsModel;
-using Microsoft.Extensions.Options;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
+using IdentityUI.Core.Core.OptionsModel;
+using Microsoft.Extensions.Options;
 
-namespace IdentityUI.Core.Services
+namespace IdentityUI.Core.Service.Services
 {
 
     public class EmailService : IEmailService

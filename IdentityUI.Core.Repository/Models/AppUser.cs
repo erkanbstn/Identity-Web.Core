@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using IdentityUI.Core.Core.Models;
+using Microsoft.AspNetCore.Identity;
 
-namespace IdentityUI.Core.Models
+namespace IdentityUI.Core.Repository.Models
 {
     public class AppUser : IdentityUser
     {

@@ -1,4 +1,4 @@
-﻿namespace IdentityUI.Core.Permissions
+﻿namespace IdentityUI.Core.Core.Permissions
 {
     public static class Permission
     {

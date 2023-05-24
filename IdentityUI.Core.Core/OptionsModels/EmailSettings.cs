@@ -1,4 +1,4 @@
-﻿namespace IdentityUI.Core.OptionsModel
+﻿namespace IdentityUI.Core.Core.OptionsModel
 {
     public class EmailSettings
     {

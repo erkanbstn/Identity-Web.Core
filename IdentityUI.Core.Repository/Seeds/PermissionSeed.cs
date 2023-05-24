@@ -1,8 +1,8 @@
-﻿using IdentityUI.Core.Models;
-using IdentityUI.Core.Permissions;
+﻿using IdentityUI.Core.Core.Permissions;
+using IdentityUI.Core.Repository.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-namespace IdentityUI.Core.Seeds
+namespace IdentityUI.Core.Repository.Seeds
 {
     public  class PermissionSeed
     {
