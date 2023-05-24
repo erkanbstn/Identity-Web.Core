@@ -5,7 +5,7 @@ namespace IdentityUI.Core.Controllers
 {
     public class OrderController : Controller
     {
-        [Authorize(Policy = "OrderPermissionReadOrDelete")]
+        [Authorize(Policy = "Permission.Order.Read")]
         public IActionResult Index()
         {
             return View();
