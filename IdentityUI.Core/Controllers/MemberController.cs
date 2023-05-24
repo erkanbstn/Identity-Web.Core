@@ -12,19 +12,12 @@ namespace IdentityUI.Core.Controllers
     [Authorize]
     public class MemberController : Controller
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly IFileProvider _fileProvider;
         private readonly IMemberService _memberService;
-        private string userName => User.Identity.Name;
-        public MemberController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IFileProvider fileProvider, IMemberService memberService)
+        public MemberController(IMemberService memberService)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _fileProvider = fileProvider;
             _memberService = memberService;
         }
-
+        private string userName => User.Identity.Name;
         public async Task<IActionResult> Index()
         {
             return View(await _memberService.GetUserViewModelByUserNameAsync(userName));

@@ -33,11 +33,6 @@ namespace IdentityUI.Core.Service.Services
             return new UserViewModel { Email = currentUser.Email, UserName = currentUser.UserName, Phone = currentUser.PhoneNumber, Picture = currentUser.Picture };
         }
 
-        public async Task SignOutAsync()
-        {
-            await _signInManager.SignOutAsync();
-        }
-
         public async Task<bool> CheckPasswordAsync(string userName, string oldPassword)
         {
             var currentUser = await _userManager.FindByNameAsync(userName);

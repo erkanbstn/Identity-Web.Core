@@ -10,16 +10,10 @@ namespace IdentityUI.Core.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly IEmailService _emailService;
-        private readonly IMemberService _memberService;
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService, IMemberService memberService)
+        private readonly IAuthService _authService;
+        public AuthController(IAuthService authService)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailService = emailService;
-            _memberService = memberService;
+            _authService = authService;
         }
         public IActionResult SignIn()
         {
@@ -36,15 +30,15 @@ namespace IdentityUI.Core.Controllers
         [HttpPost]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel resetPasswordViewModel)
         {
-            var hasUser = await _userManager.FindByEmailAsync(resetPasswordViewModel.Email);
+            var hasUser = await _authService.SendEmailToForgetPasswordAsync(resetPasswordViewModel.Email);
             if (hasUser == null)
             {
                 ModelState.AddModelError(string.Empty, "Bu Emaile Sahip Kullanıcı Bulunamamıştır.");
                 return View();
             }
-            string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
+            string passwordResetToken = await _authService.GeneratePasswordResetTokenAsync(hasUser);
             var passwordResetLink = Url.Action("ResetPassword", "Auth", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
-            await _emailService.SendResetPasswordEmail(passwordResetLink, hasUser.Email);
+            await _authService.SendResetPasswordEmail(passwordResetLink, hasUser.Email);
             // https://localhost:7278?userId=1&token=asdasddadasd
             TempData["success"] = "Şifre Yenileme Linki E-Posta Adresinize Gönderilmiştir.";
             return RedirectToAction("ForgetPassword");
@@ -53,8 +47,8 @@ namespace IdentityUI.Core.Controllers
         public async Task<IActionResult> SignIn(SignInViewModel signInViewModel, string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Action("Index", "Member");
-            var hasUser = await _userManager.FindByEmailAsync(signInViewModel.Email);
 
+            var hasUser = await _authService.FindByEmailAsync(signInViewModel.Email);
             if (hasUser == null)
             {
                 ModelState.AddModelError(string.Empty, "Email veya Parola Yanlıştır.");
@@ -66,7 +60,7 @@ namespace IdentityUI.Core.Controllers
             //    ModelState.AddModelError(string.Empty, "Email veya Parola Yanlıştır.");
             //    return View();
             //}
-            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, signInViewModel.Password, signInViewModel.RememberMe, true);
+            var signInResult = await _authService.PasswordSignInAsync(hasUser, signInViewModel.Password, signInViewModel.RememberMe);
             if (signInResult.IsLockedOut)
             {
                 ModelState.AddModelErrorList(new List<string> { "3 Dakika Boyunca Giriş Yapamazsınız Lütfen Daha Sonra Tekrar Deneyin." });
@@ -74,12 +68,12 @@ namespace IdentityUI.Core.Controllers
             }
             if (!signInResult.Succeeded)
             {
-                ModelState.AddModelErrorList(new List<string> { $"Email veya Parola Yanlıştır.", $"Başarısız Giriş Sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)}" });
+                ModelState.AddModelErrorList(new List<string> { $"Email veya Parola Yanlıştır.", $"Başarısız Giriş Sayısı : {await _authService.GetAccessFailedCountAsync(hasUser)}" });
                 return View();
             }
             if (hasUser.BirthDay.HasValue)
             {
-                await _signInManager.SignInWithClaimsAsync(hasUser, signInViewModel.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDay.Value.ToString()) });
+                await _authService.SignInWithClaimsAsync(hasUser, signInViewModel.RememberMe);
             }
             return Redirect(returnUrl);
         }
@@ -90,15 +84,14 @@ namespace IdentityUI.Core.Controllers
             {
                 return View();
             }
-            var result = await _userManager.CreateAsync(new() { UserName = signUpViewModel.UserName, PhoneNumber = signUpViewModel.Phone, Email = signUpViewModel.Email }, signUpViewModel.PasswordConfirm);
+            var result = await _authService.CreateAsync(signUpViewModel.UserName, signUpViewModel.Phone, signUpViewModel.Email, signUpViewModel.Password);
             if (!result.Succeeded)
             {
                 ModelState.AddModelErrorList(result.Errors.Select(b => b.Description).ToList());
                 return View();
             }
-            var exchangeExpireClaim = new Claim("ExchangeExpireDate", DateTime.Now.AddDays(10).ToString());
-            var user = await _userManager.FindByNameAsync(signUpViewModel.UserName);
-            var claimResult = await _userManager.AddClaimAsync(user, exchangeExpireClaim);
+            var user = await _authService.FindByNameAsync(signUpViewModel.UserName);
+            var claimResult = await _authService.AddClaimAsync(user);
             if (!claimResult.Succeeded)
             {
                 ModelState.AddModelErrorList(claimResult.Errors.Select(b => b.Description).ToList());
@@ -122,7 +115,6 @@ namespace IdentityUI.Core.Controllers
             TempData["SuccessMessage"] = null;
             TempData["userId"] = userId;
             TempData["token"] = token;
-            var hasUser = await _userManager.FindByIdAsync(userId);
             return View();
         }
         [HttpPost]
@@ -136,16 +128,16 @@ namespace IdentityUI.Core.Controllers
                 throw new Exception("Bir Hata Meydana Geldi");
             }
 
-            var hasUser = await _userManager.FindByIdAsync(userId.ToString());
+            var hasUser = await _authService.FindByIdAsync(userId.ToString());
             if (hasUser == null)
             {
                 ModelState.AddModelError(string.Empty, "Kullanıcı Bulunamamıştır");
                 return View();
             }
-            var result = await _userManager.ResetPasswordAsync(hasUser, token.ToString(), resetPasswordViewModel.Password);
+            var result = await _authService.ResetPasswordAsync(hasUser, token, resetPasswordViewModel.Password);
             if (result.Succeeded)
             {
-                await _userManager.UpdateSecurityStampAsync(hasUser);
+                await _authService.UpdateSecurityStampAsync(hasUser);
                 TempData["SuccessMessage"] = "Şifreniz Başarıyla Yenilenmiştir";
             }
             else
@@ -156,7 +148,7 @@ namespace IdentityUI.Core.Controllers
         }
         public async Task SignOut()
         {
-            await _memberService.SignOutAsync();
+            await _authService.SignOutAsync();
         }
         public IActionResult AccessDenied(string ReturnUrl)
         {

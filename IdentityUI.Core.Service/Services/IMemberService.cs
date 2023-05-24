@@ -13,7 +13,6 @@ namespace IdentityUI.Core.Service.Services
     public interface IMemberService
     {
         Task<UserViewModel> GetUserViewModelByUserNameAsync(string userName);
-        Task SignOutAsync();
         Task<(bool, IEnumerable<IdentityError>)> ChangePasswordAsync(string userName, string oldPassword, string newPassword);
         Task<bool> CheckPasswordAsync(string userName, string oldPassword);
         Task<UserEditViewModel> GetUserEditViewModelAsync(string userName);
