@@ -2,6 +2,7 @@ using IdentityUI.Core.ClaimProvider;
 using IdentityUI.Core.Extensions;
 using IdentityUI.Core.Models;
 using IdentityUI.Core.OptionsModel;
+using IdentityUI.Core.Permissions;
 using IdentityUI.Core.Requirements;
 using IdentityUI.Core.Seeds;
 using IdentityUI.Core.Services;
@@ -20,10 +21,10 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("Sql"));
 });
-    builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
-    {
-        opt.ValidationInterval = TimeSpan.FromMinutes(30);
-    });
+builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
+{
+    opt.ValidationInterval = TimeSpan.FromMinutes(30);
+});
 builder.Services.AddAuthorization(opt =>
 {
     opt.AddPolicy("ÝstanbulPolicy", policy =>
@@ -36,7 +37,26 @@ builder.Services.AddAuthorization(opt =>
     });
     opt.AddPolicy("ViolencePolicy", policy =>
     {
-        policy.AddRequirements(new ViolenceRequirement() { ThreshOldAge=18});
+        policy.AddRequirements(new ViolenceRequirement() { ThreshOldAge = 18 });
+    });
+    opt.AddPolicy("OrderPermissionReadOrDelete", policy =>
+    {
+        policy.RequireClaim("permission", Permission.Order.Read);
+        policy.RequireClaim("permission", Permission.Order.Delete);
+        policy.RequireClaim("permission", Permission.Stock.Delete);
+    });
+
+    opt.AddPolicy("Permission.Order.Read", policy =>
+    {
+        policy.RequireClaim("permission", Permission.Order.Read);
+    });
+    opt.AddPolicy("Permission.Order.Delete", policy =>
+    {
+        policy.RequireClaim("permission", Permission.Order.Delete);
+    });
+    opt.AddPolicy("Permission.Stock.Delete", policy =>
+    {
+        policy.RequireClaim("permission", Permission.Stock.Delete);
     });
 });
 builder.Services.AddScoped<IAuthorizationHandler, ExchangeExpireRequirementHandler>();
@@ -63,8 +83,8 @@ using (var scope = app.Services.CreateScope())
     await PermissionSeed.Seed(roleManager);
 }
 
-    // Configure the HTTP request pipeline.
-    if (!app.Environment.IsDevelopment())
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
