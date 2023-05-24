@@ -60,19 +60,28 @@ namespace IdentityUI.Core.Controllers
                 ModelState.AddModelError(string.Empty, "Email veya Parola Yanlıştır.");
                 return View();
             }
+            //var passwordCheck = await _userManager.CheckPasswordAsync(hasUser, signInViewModel.Password);
+            //if (!passwordCheck)
+            //{
+            //    ModelState.AddModelError(string.Empty, "Email veya Parola Yanlıştır.");
+            //    return View();
+            //}
             var signInResult = await _signInManager.PasswordSignInAsync(hasUser, signInViewModel.Password, signInViewModel.RememberMe, true);
-            if (signInResult.Succeeded)
-            {
-                return Redirect(returnUrl);
-            }
             if (signInResult.IsLockedOut)
             {
                 ModelState.AddModelErrorList(new List<string> { "3 Dakika Boyunca Giriş Yapamazsınız Lütfen Daha Sonra Tekrar Deneyin." });
                 return View();
             }
-
-            ModelState.AddModelErrorList(new List<string> { $"Email veya Parola Yanlıştır.", $"Başarısız Giriş Sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)}" });
-            return View();
+            if (!signInResult.Succeeded)
+            {
+                ModelState.AddModelErrorList(new List<string> { $"Email veya Parola Yanlıştır.", $"Başarısız Giriş Sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)}" });
+                return View();
+            }
+            if (hasUser.BirthDay.HasValue)
+            {
+                await _signInManager.SignInWithClaimsAsync(hasUser, signInViewModel.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDay.Value.ToString()) });
+            }
+            return Redirect(returnUrl);
         }
         [HttpPost]
         public async Task<IActionResult> SignUp(SignUpViewModel signUpViewModel)

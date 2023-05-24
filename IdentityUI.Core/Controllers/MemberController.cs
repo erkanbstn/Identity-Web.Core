@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace IdentityUI.Core.Controllers
 {
@@ -29,6 +31,7 @@ namespace IdentityUI.Core.Controllers
             var userViewModel = new UserViewModel { Email = currentUser.Email, UserName = currentUser.UserName, Phone = currentUser.PhoneNumber, Picture = currentUser.Picture };
             return View(userViewModel);
         }
+        [Authorize(Policy = "ExchangePolicy")]
         public IActionResult ReturnTest()
         {
             return View();
@@ -79,6 +82,7 @@ namespace IdentityUI.Core.Controllers
             return View(userEditViewModel);
         }
         [HttpPost]
+        [Authorize(Policy = "İstanbulPolicy")]
         public async Task<IActionResult> UserEdit(UserEditViewModel userEditViewModel)
         {
             ViewBag.genderlist = new SelectList(Enum.GetNames(typeof(Gender)));
@@ -110,11 +114,17 @@ namespace IdentityUI.Core.Controllers
             }
             await _userManager.UpdateSecurityStampAsync(currentUser);
             await _signInManager.SignOutAsync();
-            await _signInManager.SignInAsync(currentUser, true);
+            if (currentUser.BirthDay.HasValue)
+            {
+                await _signInManager.SignInWithClaimsAsync(currentUser, true, new[] { new Claim("birthdate", currentUser.BirthDay.Value.ToString()) });
+            }
+            else
+            {
+                await _signInManager.SignInAsync(currentUser, true);
+            }
             TempData["Success2"] = "Üye Bilgileri Başarıyla Değiştirildi";
             return View(userEditViewModel);
         }
-        [Authorize(Policy = "İstanbulPolicy,ExchangePolicy")]
         public IActionResult UserClaims()
         {
             var userClaim = User.Claims.Select(b => new ClaimViewModel()
